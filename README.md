@@ -1,5 +1,9 @@
 # Monorepo Starter Template
 
+[![CI](https://github.com/byte55/project-template/actions/workflows/ci.yml/badge.svg)](https://github.com/byte55/project-template/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/byte55/project-template/actions/workflows/codeql.yml/badge.svg)](https://github.com/byte55/project-template/actions/workflows/codeql.yml)
+[![License: 0BSD](https://img.shields.io/badge/license-0BSD-blue.svg)](LICENSE)
+
 Production-ready starter for TypeScript full-stack apps. Docker-first with hot-reload,
 a single command to spin everything up, a separate prod setup with Traefik, and CI
 already configured.
