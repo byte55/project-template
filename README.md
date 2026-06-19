@@ -150,6 +150,31 @@ break the volume mounts.)
 | Browser title + description | `apps/web/src/app/layout.tsx`, `CLAUDE.md`                             | recommended |
 | Host ports                | `.env` (see below) — only needed when running alongside other projects   | depends on setup |
 
+### Clean up the template's repo meta files
+
+The following files describe **this template as a public open-source repo** — they are
+not part of your application and carry references (badges, URLs, contact) that point
+back at the template. Delete or adapt them for your own project:
+
+| File | What to do |
+| ---- | ---------- |
+| `CHANGELOG.md` | Delete — it tracks the template's history, not your app's. |
+| `CODE_OF_CONDUCT.md` | Delete, or keep and replace the reporting contact with your own. |
+| `SECURITY.md` | Delete, or update the advisory/report URL to your repo. |
+| `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md` | Delete, or adapt the links inside `config.yml`. |
+| `.github/dependabot.yml`, `.github/workflows/codeql.yml` | Keep — generic and useful. |
+| README badges (top of this file) | Repoint the `byte55/project-template` URLs to your repo, or remove. |
+| `LICENSE` | Replace with your own license if 0BSD doesn't fit. |
+
+`CONTRIBUTING.md` is generic (setup + conventions) and can stay as-is.
+
+```bash
+# Quick removal if you don't want any of the OSS meta files:
+rm -f CHANGELOG.md CODE_OF_CONDUCT.md SECURITY.md \
+      .github/PULL_REQUEST_TEMPLATE.md
+rm -rf .github/ISSUE_TEMPLATE
+```
+
 ### Rename the scope automatically
 
 ```bash
