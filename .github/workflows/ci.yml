@@ -39,6 +39,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          # pnpm is provided via corepack in the next step, so disable
+          # setup-node's auto package-manager cache (it runs before pnpm exists).
+          package-manager-cache: false
 
       # pnpm via corepack (as in the Dockerfiles)
       - run: corepack enable && corepack install
