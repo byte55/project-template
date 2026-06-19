@@ -65,3 +65,17 @@ jobs:
       # Tests
       - run: pnpm --filter @app/api test
       - run: pnpm --filter @app/web test
+
+  # Verify the production Dockerfiles still build (they aren't exercised by the
+  # dev stack, so they can rot silently otherwise).
+  build-prod-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API production image
+        run: docker build -f Dockerfile.api.prod -t api-prod .
+
+      - name: Build Web production image
+        run: docker build -f Dockerfile.web.prod -t web-prod .

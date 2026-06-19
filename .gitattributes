@@ -1,0 +1,19 @@
+# Normalize line endings: enforce LF on checkout/commit across all platforms.
+# Prevents CRLF from breaking shell scripts when cloned on Windows.
+* text=auto eol=lf
+
+# Shell scripts must always be LF.
+*.sh text eol=lf
+
+# Binary files — never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+
+# Generated — collapse in diffs and exclude from GitHub language stats.
+pnpm-lock.yaml linguist-generated=true -diff
