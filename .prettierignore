@@ -1,0 +1,9 @@
+node_modules
+dist
+.next
+.turbo
+.docker-data
+pnpm-lock.yaml
+
+# Markdown docs are hand-formatted (intentional line wrapping in tables/prose)
+*.md

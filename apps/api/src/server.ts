@@ -32,14 +32,16 @@ server.route({
     const url = new URL(request.url, `http://${request.headers.host}`);
     const headers = new Headers();
     Object.entries(request.headers).forEach(([key, value]) => {
-      if (value) headers.append(key, Array.isArray(value) ? value.join(", ") : value);
+      if (value)
+        headers.append(key, Array.isArray(value) ? value.join(", ") : value);
     });
 
     const response = await auth.handler(
       new Request(url.toString(), {
         method: request.method,
         headers,
-        body: request.method !== "GET" ? JSON.stringify(request.body) : undefined,
+        body:
+          request.method !== "GET" ? JSON.stringify(request.body) : undefined,
       }),
     );
 
@@ -67,7 +69,9 @@ server.get("/health", async (_request, reply) => {
     await db.execute(sql`SELECT 1`);
     return { status: "ok" };
   } catch {
-    return reply.status(503).send({ status: "error", message: "DB unreachable" });
+    return reply
+      .status(503)
+      .send({ status: "error", message: "DB unreachable" });
   }
 });
 

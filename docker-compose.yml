@@ -61,6 +61,10 @@ services:
       - ./packages/db/package.json:/app/packages/db/package.json
       - ./packages/shared/src:/app/packages/shared/src
       - ./packages/shared/package.json:/app/packages/shared/package.json
+      # Lint/format config (used by `task lint` / `task format`, runs in this container)
+      - ./eslint.config.mjs:/app/eslint.config.mjs
+      - ./.prettierrc:/app/.prettierrc
+      - ./.prettierignore:/app/.prettierignore
       # .env for the `tsx --env-file` command (read-only, not baked into the image)
       - ./.env:/app/.env:ro
       - /app/node_modules

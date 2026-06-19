@@ -108,6 +108,22 @@ tasks:
     desc: Type-check Web
     cmd: docker compose exec web pnpm --filter @app/web exec tsc --noEmit
 
+  # ── Lint / Format ──
+
+  lint:
+    desc: Lint with ESLint
+    cmd: docker compose exec api pnpm exec eslint .
+
+  # Prettier runs against the whole repo (incl. files not mounted into the
+  # service, like root configs) via a one-off container with the repo bind-mounted.
+  format:
+    desc: Format all files with Prettier
+    cmd: docker compose run --rm --no-deps -v "$PWD":/work -w /work api /app/node_modules/.bin/prettier --write .
+
+  format:check:
+    desc: Check formatting with Prettier
+    cmd: docker compose run --rm --no-deps -v "$PWD":/work -w /work api /app/node_modules/.bin/prettier --check .
+
   # ── Health ──
 
   health:

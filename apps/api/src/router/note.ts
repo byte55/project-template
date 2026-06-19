@@ -22,7 +22,9 @@ export const noteRouter = router({
       const [note] = await ctx.db
         .select()
         .from(notes)
-        .where(and(eq(notes.id, input.id), eq(notes.userId, ctx.session.user.id)))
+        .where(
+          and(eq(notes.id, input.id), eq(notes.userId, ctx.session.user.id)),
+        )
         .limit(1);
 
       if (!note) {
@@ -62,7 +64,9 @@ export const noteRouter = router({
     .mutation(async ({ ctx, input }) => {
       const [deleted] = await ctx.db
         .delete(notes)
-        .where(and(eq(notes.id, input.id), eq(notes.userId, ctx.session.user.id)))
+        .where(
+          and(eq(notes.id, input.id), eq(notes.userId, ctx.session.user.id)),
+        )
         .returning();
 
       if (!deleted) {

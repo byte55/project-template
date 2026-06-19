@@ -21,6 +21,8 @@ task db:push             # Push Drizzle schema
 task db:reset            # Drop + recreate DB, push schema, seed
 task seed                # Seed dev DB (demo@example.com / demo1234)
 task check               # Type-check API + Web
+task lint                # Lint (ESLint)
+task format              # Format all files (Prettier)
 task test                # All tests (API + Web)
 task health              # Check that the API boots and the DB is reachable
 ```

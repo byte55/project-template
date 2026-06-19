@@ -45,6 +45,10 @@ jobs:
 
       - run: pnpm install
 
+      # Lint + formatting (no database needed)
+      - run: pnpm exec eslint .
+      - run: pnpm exec prettier --check .
+
       # Create the test database
       - run: |
           node --input-type=module -e "import postgres from 'postgres';const p=postgres('$DATABASE_URL');p.unsafe('CREATE DATABASE app_test').then(()=>p.end()).catch(e=>{if(e.code==='42P04')p.end();else{console.error(e);process.exit(1)}})"

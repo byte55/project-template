@@ -98,6 +98,8 @@ task up / down / build        # control the stack
 task restart -- web           # restart a single service
 task logs:api                 # follow logs
 task check                    # type-check (API + Web)
+task lint                     # lint (ESLint)
+task format                   # format all files (Prettier)
 task test                     # all tests
 task db:reset                 # drop the DB, re-push, seed
 task db:studio                # Drizzle Studio (DB browser)

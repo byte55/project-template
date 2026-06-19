@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { sql } from "drizzle-orm";
 import { notes } from "@app/db";
-import {
-  testDb,
-  createTestUser,
-  createTestCaller,
-} from "../../test-utils.js";
+import { testDb, createTestUser, createTestCaller } from "../../test-utils.js";
 
 describe("note router", () => {
   beforeEach(async () => {
@@ -28,7 +24,10 @@ describe("note router", () => {
     const alice = await createTestUser();
     const bob = await createTestUser();
 
-    await createTestCaller(alice).note.create({ title: "Alice's note", body: "" });
+    await createTestCaller(alice).note.create({
+      title: "Alice's note",
+      body: "",
+    });
 
     const bobsList = await createTestCaller(bob).note.list();
     expect(bobsList).toHaveLength(0);
@@ -43,9 +42,9 @@ describe("note router", () => {
       body: "",
     });
 
-    await expect(createTestCaller(bob).note.byId({ id: note.id })).rejects.toThrow(
-      /not found/,
-    );
+    await expect(
+      createTestCaller(bob).note.byId({ id: note.id }),
+    ).rejects.toThrow(/not found/);
   });
 
   it("keeps the database reachable", async () => {

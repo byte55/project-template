@@ -24,7 +24,9 @@ export function createDb(url: string) {
  * helpers remain usable inside `db.transaction()`.
  */
 type DrizzleDb = ReturnType<typeof createDb>;
-export type Transaction = Parameters<Parameters<DrizzleDb["transaction"]>[0]>[0];
+export type Transaction = Parameters<
+  Parameters<DrizzleDb["transaction"]>[0]
+>[0];
 export type Database = DrizzleDb | Transaction;
 
 // Default instance from DATABASE_URL (app runtime).

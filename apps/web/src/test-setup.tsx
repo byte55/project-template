@@ -14,15 +14,22 @@ vi.mock("next/navigation", () => ({
 
 // next/link → simple <a>.
 vi.mock("next/link", () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
 }));
 
 // Mock the auth client — logged in by default.
 vi.mock("@/lib/auth-client", () => ({
   authClient: {
-    useSession: () => ({ data: { user: { id: "test-user" } }, isPending: false }),
+    useSession: () => ({
+      data: { user: { id: "test-user" } },
+      isPending: false,
+    }),
     signIn: { email: vi.fn() },
     signUp: { email: vi.fn() },
     signOut: vi.fn(),
