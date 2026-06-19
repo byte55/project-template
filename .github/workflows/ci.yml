@@ -34,9 +34,9 @@ jobs:
       WEB_URL: http://localhost:3100
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           # pnpm is provided via corepack in the next step, so disable
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Build API production image
         run: docker build -f Dockerfile.api.prod -t api-prod .
