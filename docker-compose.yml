@@ -1,0 +1,95 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      # Host ports overridable via .env so multiple projects can run in parallel
+      - "${POSTGRES_PORT:-5434}:5432"
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      - ./.docker-data/postgres:/var/lib/postgresql/data
+      - ./scripts/init-test-db.sh:/docker-entrypoint-initdb.d/init-test-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ./.docker-data/redis:/data
+
+  # Email catcher for local testing (UI at http://localhost:8025)
+  mailpit:
+    image: axllent/mailpit:v1.30.1
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-4000}:4000"
+    environment:
+      DATABASE_URL: postgresql://app:app@postgres:5432/app
+      TEST_DATABASE_URL: postgresql://app:app@postgres:5432/app_test
+      REDIS_URL: redis://redis:6379
+      API_PORT: 4000
+      WEB_URL: http://localhost:${WEB_PORT:-3100}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me}
+      BETTER_AUTH_URL: http://localhost:${API_PORT:-4000}
+    volumes:
+      # Source code is mounted → hot reload via tsx watch. WORKDIR in the container
+      # is /app (see Dockerfile) — do NOT rename these paths.
+      # node_modules stays as an anonymous volume in the container so host and
+      # container don't get in each other's way.
+      - ./apps/api/src:/app/apps/api/src
+      - ./apps/api/package.json:/app/apps/api/package.json
+      - ./apps/api/vitest.config.ts:/app/apps/api/vitest.config.ts
+      - ./packages/db/src:/app/packages/db/src
+      - ./packages/db/package.json:/app/packages/db/package.json
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/shared/package.json:/app/packages/shared/package.json
+      # .env for the `tsx --env-file` command (read-only, not baked into the image)
+      - ./.env:/app/.env:ro
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3100}:3100"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-4000}
+      # Next.js needs polling for file watching on mounted volumes
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./apps/web/next.config.ts:/app/apps/web/next.config.ts
+      - ./apps/web/vitest.config.ts:/app/apps/web/vitest.config.ts
+      - ./apps/web/postcss.config.mjs:/app/apps/web/postcss.config.mjs
+      - ./apps/web/package.json:/app/apps/web/package.json
+      # Web imports the API's tRPC types + shared package
+      - ./apps/api/src:/app/apps/api/src
+      - ./apps/api/package.json:/app/apps/api/package.json
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/db/src:/app/packages/db/src
+      - /app/node_modules
+    depends_on:
+      - api

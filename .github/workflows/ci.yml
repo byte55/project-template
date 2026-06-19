@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://app:app@localhost:5432/app
+      TEST_DATABASE_URL: postgresql://app:app@localhost:5432/app_test
+      BETTER_AUTH_SECRET: ci-test-secret
+      BETTER_AUTH_URL: http://localhost:4000
+      WEB_URL: http://localhost:3100
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # pnpm via corepack (as in the Dockerfiles)
+      - run: corepack enable && corepack install
+
+      - run: pnpm install
+
+      # Create the test database
+      - run: |
+          node --input-type=module -e "import postgres from 'postgres';const p=postgres('$DATABASE_URL');p.unsafe('CREATE DATABASE app_test').then(()=>p.end()).catch(e=>{if(e.code==='42P04')p.end();else{console.error(e);process.exit(1)}})"
+        working-directory: packages/db
+
+      # Push schema to both databases
+      - run: pnpm --filter @app/db exec drizzle-kit push
+      - run: DATABASE_URL=$TEST_DATABASE_URL pnpm --filter @app/db exec drizzle-kit push
+
+      # Type check
+      - run: pnpm --filter @app/api exec tsc --noEmit
+      - run: pnpm --filter @app/web exec tsc --noEmit
+
+      # Tests
+      - run: pnpm --filter @app/api test
+      - run: pnpm --filter @app/web test

@@ -1,0 +1,125 @@
+version: "3"
+
+vars:
+  DB_URL_INTERNAL: postgresql://app:app@postgres:5432/app
+  DB_URL_TEST: postgresql://app:app@postgres:5432/app_test
+
+tasks:
+  # ── Docker ──
+
+  up:
+    desc: Start all services
+    cmd: docker compose up -d
+
+  down:
+    desc: Stop all services
+    cmd: docker compose down
+
+  build:
+    desc: Full rebuild (Dockerfiles or base deps changed)
+    cmd: docker compose up -d --build
+
+  restart:
+    desc: Restart a service (e.g. task restart -- web)
+    cmd: docker compose restart {{.CLI_ARGS}}
+
+  # ── Logs ──
+
+  logs:
+    desc: Follow logs for all services
+    cmd: docker compose logs -f {{.CLI_ARGS}}
+
+  logs:api:
+    desc: Follow API logs
+    cmd: docker compose logs -f api
+
+  logs:web:
+    desc: Follow Web logs
+    cmd: docker compose logs -f web
+
+  # ── Dependencies ──
+
+  install:
+    desc: Install dependencies in both containers
+    cmds:
+      - docker compose exec api pnpm install --no-frozen-lockfile
+      - docker compose exec web pnpm install --no-frozen-lockfile
+
+  # ── Database ──
+
+  db:push:
+    desc: Push Drizzle schema to database
+    cmd: docker compose exec api sh -c 'DATABASE_URL={{.DB_URL_INTERNAL}} pnpm --filter @app/db exec drizzle-kit push'
+
+  db:push:test:
+    desc: Push Drizzle schema to test database
+    cmd: docker compose exec api sh -c 'DATABASE_URL={{.DB_URL_TEST}} pnpm --filter @app/db exec drizzle-kit push'
+
+  db:studio:
+    desc: Open Drizzle Studio (DB browser)
+    cmd: docker compose exec api pnpm --filter @app/db db:studio
+
+  db:psql:
+    desc: Open psql shell
+    cmd: docker compose exec postgres psql -U app
+
+  db:reset:
+    desc: Drop & recreate dev database, push schema, then seed
+    cmds:
+      - docker compose exec postgres psql -U app -d postgres -c "DROP DATABASE IF EXISTS app WITH (FORCE);"
+      - docker compose exec postgres psql -U app -d postgres -c "CREATE DATABASE app OWNER app;"
+      - task: db:push
+      - task: seed
+      - docker compose restart api
+
+  seed:
+    desc: Seed dev database with demo data
+    cmd: docker compose exec api npx tsx apps/api/src/seed.ts
+
+  # ── Test ──
+
+  test:
+    desc: Run all tests
+    cmds:
+      - task: test:api
+      - task: test:web
+
+  test:api:
+    desc: Run API tests
+    cmd: docker compose exec api pnpm --filter @app/api test
+
+  test:web:
+    desc: Run Web tests
+    cmd: docker compose exec web pnpm --filter @app/web test
+
+  # ── Type-Check ──
+
+  check:
+    desc: Type-check API and Web
+    cmds:
+      - task: check:api
+      - task: check:web
+
+  check:api:
+    desc: Type-check API
+    cmd: docker compose exec api pnpm --filter @app/api exec tsc --noEmit
+
+  check:web:
+    desc: Type-check Web
+    cmd: docker compose exec web pnpm --filter @app/web exec tsc --noEmit
+
+  # ── Health ──
+
+  health:
+    desc: Check if API is healthy
+    cmd: curl -sf http://localhost:4000/health | jq .
+
+  # ── Shell ──
+
+  sh:api:
+    desc: Open shell in API container
+    cmd: docker compose exec api sh
+
+  sh:web:
+    desc: Open shell in Web container
+    cmd: docker compose exec web sh
