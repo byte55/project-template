@@ -5,12 +5,9 @@
 Please **do not** report security vulnerabilities through public GitHub issues,
 pull requests, or discussions.
 
-Instead, report them privately via one of:
-
-- **GitHub Security Advisories** — use the
-  [private vulnerability reporting](https://github.com/byte55/project-template/security/advisories/new)
-  form (preferred).
-- **Email** — <walteritservices@gmail.com>
+Instead, report them privately through
+[GitHub Security Advisories](https://github.com/byte55/project-template/security/advisories/new)
+using the private vulnerability reporting form.
 
 Please include as much of the following as you can:
 
